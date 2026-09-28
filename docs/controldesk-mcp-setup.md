@@ -22,7 +22,7 @@
 | 항목 | 내용 |
 |---|---|
 | OS | Windows (64-bit) |
-| ControlDesk | 2025-A 이상 설치 + **라이선스 활성화** (2026-A 권장) |
+| ControlDesk | 2025-A 이상 설치 + **라이선스 활성화** (이 PC: **2025-A**) |
 | PowerShell | Windows 기본 포함 |
 
 ControlDesk COM이 살아있는지 먼저 확인 (PowerShell):
@@ -115,7 +115,7 @@ $app.GetType().FullName
          "command": "cmd",
          "args": ["/c", "C:\\mcp\\ControlDeskMCP\\ControlDeskMCP.cmd"],
          "env": {
-           "CONTROLDESK_VERSION": "2026-A"
+           "CONTROLDESK_VERSION": "2025-A"
          }
        }
      }
@@ -128,13 +128,14 @@ $app.GetType().FullName
        "controldesk": {
          "command": "C:\\mcp\\ControlDeskMCP\\ControlDeskMCP.exe",
          "args": [],
-         "env": { "CONTROLDESK_VERSION": "2026-A" }
+         "env": { "CONTROLDESK_VERSION": "2025-A" }
        }
      }
    }
    ```
    - JSON 경로는 `\\` 두 번. 마지막 콤마 금지.
-   - `CONTROLDESK_VERSION`은 설치된 버전에 맞게. 하나만 설치돼 있으면 `env` 블록 통째로 빼도 됨.
+   - 이 PC는 ControlDesk **2025-A** → `"2025-A"` (하이픈 필수! `2025A`는 형식 오류로 서버가 안 뜸).
+     ControlDesk가 하나만 설치돼 있으면 `env` 블록 통째로 빼도 자동 감지됨.
 4. Claude Desktop **완전 종료**(트레이 아이콘 → Quit) 후 재실행
 5. 채팅 입력창의 도구(🔨/설정) 아이콘에 `controldesk`가 보이면 성공
 
@@ -146,11 +147,11 @@ $app.GetType().FullName
    ```
 2. 서버 등록 (모든 프로젝트에서 쓰려면 `--scope user`):
    ```powershell
-   claude mcp add controldesk --scope user -e CONTROLDESK_VERSION=2026-A -- cmd /c C:\mcp\ControlDeskMCP\ControlDeskMCP.cmd
+   claude mcp add controldesk --scope user -e CONTROLDESK_VERSION=2025-A -- cmd /c C:\mcp\ControlDeskMCP\ControlDeskMCP.cmd
    ```
    exe 사용 시:
    ```powershell
-   claude mcp add controldesk --scope user -e CONTROLDESK_VERSION=2026-A -- C:\mcp\ControlDeskMCP\ControlDeskMCP.exe
+   claude mcp add controldesk --scope user -e CONTROLDESK_VERSION=2025-A -- C:\mcp\ControlDeskMCP\ControlDeskMCP.exe
    ```
 3. 확인: `claude mcp list` → `controldesk: ... ✓ Connected`
    `claude` 실행 후 `/mcp` 로도 상태 확인 가능
@@ -165,7 +166,7 @@ $app.GetType().FullName
     "ControlDeskMCP": {
       "type": "stdio",
       "command": "C:\\mcp\\ControlDeskMCP\\ControlDeskMCP.cmd",
-      "env": { "CONTROLDESK_VERSION": "2026-A" }
+      "env": { "CONTROLDESK_VERSION": "2025-A" }
     }
   }
 }
@@ -200,7 +201,7 @@ ControlDesk에 연결하고 사용 가능한 플랫폼 보여줘.
 
 | 변수 | 용도 | 예 |
 |---|---|---|
-| `CONTROLDESK_VERSION` | 특정 ControlDesk 버전 지정 (없으면 최신) | `2026-A` |
+| `CONTROLDESK_VERSION` | 특정 ControlDesk 버전 지정 (없으면 최신). 반드시 `YYYY-L` 형식 | `2025-A` |
 | `COM_LAUNCH_TIMEOUT_MS` | ControlDesk 기동 대기시간 (느린 PC) | `60000` |
 | `COM_TIMEOUT_MS` | COM 호출 타임아웃 | `30000` |
 | `LOG_LEVEL` | 로그 레벨 | `DEBUG` |
