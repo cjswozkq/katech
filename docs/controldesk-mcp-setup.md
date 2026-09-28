@@ -36,25 +36,37 @@ $app.GetType().FullName
 
 ## 2. 서버 설치 — 방법 A 또는 B 중 하나
 
-### 방법 A: 릴리스 exe (가장 간단, Python/uv/Git 불필요)
+### 방법 A: 릴리스 zip (가장 간단, Python/uv/Git 불필요)
 
-1. `C:\mcp\ControlDeskMCP` 폴더 생성
-2. https://github.com/dspace-group/ControlDeskMCP/releases 에서 최신 릴리스의
-   `ControlDeskMCP.exe`, `ControlDeskMCP.exe.sha256` 다운로드 → 위 폴더에 저장
-3. 해시 검증:
-   ```powershell
-   cd C:\mcp\ControlDeskMCP
-   (Get-FileHash .\ControlDeskMCP.exe -Algorithm SHA256).Hash
-   Get-Content .\ControlDeskMCP.exe.sha256
-   ```
-   두 값이 같으면 OK. (다운로드 파일이 차단되면 파일 우클릭 → 속성 → "차단 해제")
-4. 동작 확인:
-   ```powershell
-   .\ControlDeskMCP.exe --version
-   .\ControlDeskMCP.exe --list-tools
-   ```
+v0.1.0 릴리스에는 `controldesk-mcp-windows.zip` 하나만 올라와 있음
+(sha256: `d09b54ece1de53798fb27b5da24fd8372fc89f40b3be11e5240130f50110b991`).
+아래 블록을 PowerShell에 통째로 붙여넣으면 다운로드 → 해시 검증 → 압축 해제 → 실행 테스트까지 한 번에 진행됨.
 
-→ 이후 설정에서 실행 경로는 `C:\mcp\ControlDeskMCP\ControlDeskMCP.exe`
+```powershell
+& {
+  $ErrorActionPreference = 'Stop'
+  $ProgressPreference = 'SilentlyContinue'
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+  $dir = 'C:\mcp\ControlDeskMCP'
+  $zip = "$env:TEMP\controldesk-mcp-windows.zip"
+  $url = 'https://github.com/dspace-group/ControlDeskMCP/releases/download/v0.1.0/controldesk-mcp-windows.zip'
+  $expected = 'd09b54ece1de53798fb27b5da24fd8372fc89f40b3be11e5240130f50110b991'
+
+  New-Item -ItemType Directory -Force $dir | Out-Null
+  Invoke-WebRequest $url -OutFile $zip
+  $actual = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+  if ($actual -ne $expected) { throw "해시 불일치: $actual" }
+  Unblock-File $zip
+  Expand-Archive $zip -DestinationPath $dir -Force
+  Get-ChildItem $dir -Recurse | Unblock-File
+  $exe = (Get-ChildItem $dir -Recurse -Filter 'ControlDeskMCP.exe' | Select-Object -First 1).FullName
+  & $exe --version
+  & $exe --list-tools
+  Write-Host "완료! exe 경로: $exe" -ForegroundColor Green
+}
+```
+
+→ 이후 설정에서 실행 경로는 `C:\mcp\ControlDeskMCP\ControlDeskMCP.exe` (실제 확인됨)
 
 ### 방법 B: 소스 + uv (MCP Hub 공식 방식)
 
